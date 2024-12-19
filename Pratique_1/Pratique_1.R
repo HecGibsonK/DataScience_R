@@ -1,3 +1,7 @@
+getwd()  # Identifier son répertoire de travail
+
+setwd("E:\\WORLD\\PERSO\\Programmation\\GitHub\\DataScience_R\\Pratique_1") # Changer son répertoire de travail
+
 ##### installation et configuration de R et Rstudio ##### 
 # Pour l'installation R, je vous conseil d'aller sur le site "https://cran.r-project.org/"
 # Pour l'installation RStudio, je vous conseil d'aller sur le site "https://posit.co/"
