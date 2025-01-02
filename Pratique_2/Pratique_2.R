@@ -77,6 +77,7 @@ Clients$EducationLevel <- as.factor(Clients$EducationLevel)
 # Les groupes de la base de données
 unique(Clients$AgeGroup)
 unique(Clients$CustomerCategory)
+
 # Nombre d'individu par groupe
 categorie_stat <- table(Clients$CustomerCategory)
 prop.table(categorie_stat)
@@ -98,7 +99,7 @@ dim(ventec)
 colSums(is.na(ventec))
 
 # Renommer la colonne name en nom
-rename(Clients, "nom" = "name") # Cette fonction ne change pas le nom de la colonne dans le fichier source
+rename(Clients, "name" = "nom") # Cette fonction ne change pas le nom de la colonne dans le fichier source
 View(Clients)
 
 colnames(Clients)[2] <- "nom" # Cette fonction change le nom de la colonne dans le fichier source
@@ -108,7 +109,7 @@ View(Ventes)
 # Créer la colonne montantTotal
 Ventes$MontantTotal <- Ventes$Quantity * Ventes$Price
 
-# CA total
+# Somme du montant total
 sum(Ventes$MontantTotal, na.rm = T)
 View(Ventes)
 
@@ -147,5 +148,5 @@ jointure %>%
 liste_produit <- Ventes[(Ventes$Price > 40) & is.na(Ventes$Price) == FALSE, ]
 View(liste_produit)
 View(Ventes)
-
-
+ 
+ 
