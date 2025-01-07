@@ -109,7 +109,7 @@ View(Ventes)
 # Créer la colonne montantTotal
 Ventes$MontantTotal <- Ventes$Quantity * Ventes$Price
 
-# Somme du montant total
+# Somme du chiffre d'affaire total
 sum(Ventes$MontantTotal, na.rm = T)
 View(Ventes)
 
@@ -137,7 +137,7 @@ jointure1 <- inner_join(Ventes, Clients, by = "CustomerID")
 jointure2 <- merge(Ventes, Clients, by ="CustomerID") ## Faire joindre les 2 tableaux en ordre croissant
 
 colnames(Clients)
-# Somme de CA par type client
+# Somme du chiffre d'affaire par type client
 summarise(group_by(jointure,CustomerCategory), nb =n())
 
 jointure %>% 
