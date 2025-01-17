@@ -5,9 +5,9 @@ format: html
 editor: visual
 ---
 
-# Prediction de la consommation des vehicules
+# [**Prediction de la consommation des vehicules**]{.underline}
 
-## Activation des packages statistiques nécessaires:
+## [**Activation des packages statistiques nécessaires:**]{.underline}
 
 ##### ggplot2; readxl; dplyr; psych; car
 
@@ -22,7 +22,7 @@ library(car)      # Bibliothèque de modèle de régression
 options(digits = 3) # Combien de décimales afficher
 ```
 
-## Collection des donnees
+## [**Collection des donnees**]{.underline}
 
 ```{r}
 #| echo: false
@@ -33,30 +33,30 @@ data("mtcars")
 Mydata <- mtcars[,]
 ```
 
-## Analyse des donnees
+## [**Analyse des donnees**]{.underline}
 
-### Voir les types de donnees de "Clients"
+### [**Voir les types de donnees de "Clients"**]{.underline}
 
 ```{r}
 #| echo: false
 sapply(Mydata, class)
 ```
 
-### Voir la structure de la base de données (format plus allonge)
+### [**Voir la structure de la base de données (format plus allonge)**]{.underline}
 
 ```{r}
 #| echo: false
 # glimpse(Mydata)
 ```
 
-### voir la structure de la base de données (format plus court)
+### [**voir la structure de la base de données (format plus court)**]{.underline}
 
 ```{r}
 #| echo: false
 str(Mydata)
 ```
 
-### Verification des variables quantitatives par boucle "For"
+### [**Verification des variables quantitatives par boucle "For"**]{.underline}
 
 ```{r}
 #| echo: false
@@ -69,16 +69,14 @@ for (variable in names(Mydata)) {
 }
 ```
 
-## Resume descriptif de la base de donnee
+## [**Resume descriptif de la base de donnee**]{.underline}
 
 ```{r}
 #| echo: false
 summary(Mydata)
 ```
 
-### Distribution de la consomation des vehicules
-
-#### La consormation moyenne des vehicaules est autour de 20
+### [**Distribution de la consomation des vehicules**]{.underline}
 
 ```{r}
 #| echo: false
@@ -87,9 +85,11 @@ ggplot(data = Mydata, aes(x="Consommation des vehicule", y=mpg))+
   geom_boxplot(color="black", fill="blue")
 ```
 
-## Choix des variables pertinentes
+La consomation moyenne des vehicules est autour de 20
 
-#### Convertion des variables non quantitatives en facteur via le boucle "For" (Apres visualisation de la base de donne)
+## [**Choix des variables pertinentes**]{.underline}
+
+#### [**Convertion des variables non quantitatives en facteur via le boucle "For" (Apres visualisation de la base de donne)**]{.underline}
 
 ```{r}
 #| echo: false
@@ -102,7 +102,7 @@ for (variable in names(Mydata)) {
 }
 ```
 
-#### Convertion des variables non quantitatives en facteur
+#### [**Convertion des variables non quantitatives en facteur**]{.underline}
 
 ```{r}
 #| echo: false
@@ -112,7 +112,7 @@ Mydata$am <- as.factor(Mydata$am)
 
 ```
 
-#### Une new base de donnee sans "vs" et "am"
+#### [**Une new base de donnee sans "vs" et "am"**]{.underline}
 
 ```{r}
 #| echo: false
@@ -126,7 +126,7 @@ str(New_data)
 plot(New_data)
 ```
 
-## Matrice de correlation entre les variables quantitatives
+## [**Matrice de correlation entre les variables quantitatives**]{.underline}
 
 ```{r}
 #| echo: false
@@ -134,17 +134,18 @@ cor(New_data)
 
 ```
 
-#### Ou via "corPlot"
+## [**Ou via "corPlot"**]{.underline}
 
 ```{r}
 #| echo: false
 corPlot(New_data)
 ```
 
-Ou via le script suivant
-
 ```{r}
 #| echo: false
+
+#Ou via le script suivant
+
 # Install and load reshape2 package
 #install.packages("reshape2")
 library(reshape2)
@@ -167,23 +168,23 @@ geom_text(aes(Var2, Var1, label = value),
 
 Les variables fortement négativement reliées à la consomation sont cyl, disp, hp et carb.
 
-### Une note sur les valeurs internes de "vs"
+### [**Une note sur les valeurs internes de "vs"**]{.underline}
 
 ```{r}
 #| echo: false
 table(Mydata$vs)
 ```
 
-### Une note sur les valeurs internes de "am"
+### [**Une note sur les valeurs internes de "am"**]{.underline}
 
 ```{r}
 #| echo: false
 table(Mydata$am)
 ```
 
-## Analyse de la liaison entre mpg et am (qualitative deux modalités)
+## [**Analyse de la liaison entre mpg et am (qualitative deux modalités)**]{.underline}
 
-### Test paramétrique (Visualisation):
+### [**Test paramétrique (Visualisation):**]{.underline}
 
 ```{r}
 #| echo: false
@@ -197,7 +198,7 @@ ggplot(data = Mydata, aes(x=vs,y=mpg))+
   geom_boxplot(aes(fill=mpg))
 ```
 
-### Test paramétrique de student
+### [**Test paramétrique de student**]{.underline}
 
 ```{r}
 #| echo: false
@@ -269,43 +270,76 @@ Le P-value = 0.002 obtenu est inferieur a 0.05, par consequent nous pouvons dire
 
 ```{r}
 model <- lm(mpg ~ ., data = Mydata )
+model
 ```
+
+### [**Verification des residus**]{.underline}
 
 ```{r}
 summary(model)
 ```
 
+### [**Analyse de la normalite des residus**]{.underline}
+
 ```{r}
 residualPlot(model)
 ```
+
+### [**Verification de la multi-colinearite du model**]{.underline}
 
 ```{r}
 vif(model)
 ```
 
-```{r}
-ggplot(data = melted_corr_mat, aes(x=Var1, y=Var2, 
-                                   fill=value)) + 
-geom_tile() +
-geom_text(aes(Var2, Var1, label = value), 
-          color = "black", size = 2)
-```
+Les valeurs des variables "cyl", "disp" et "hp" sont superieur a 5 et ont une forte correlation avec la variable "mpg", par consequent, nous allons les eliminer de l'equation.
 
 ```{r}
+corPlot(New_data)
+```
+
+### Construction du nouvel modèle de régression linéaire**([apres l'elimination de]{.underline}** "cyl", "disp" et "hp"[**)**]{.underline}
+
+```{r}
+#| echo: false
+Mydata_new0 <- Mydata[,-which(names(Mydata) %in% c("cyl","disp"," hp"))]
+
+model_new0 <- lm(mpg ~ ., data = Mydata_new0 )
+```
+
+### [**Verification des residus (apres l'elimination de**]{.underline} "cyl", "disp" et "hp"[**)**]{.underline}
+
+```{r}
+summary(model_new0)
+```
+
+### [**Verification de la multi-colinearite du model (apres l'elimination de**]{.underline} "cyl", "disp" et "hp"[**)**]{.underline}
+
+```{r}
+vif(model_new0)
+```
+
+### Construction du nouvel modèle de régression linéaire**(**apres l'elimination de  "carb" et "qsec"[**)**]{.underline}
+
+```{r}
+#| echo: false
 Mydata_new <- Mydata[,-which(names(Mydata) %in% c("cyl","disp"," hp","carb","qsec"))]
 
 model_new <- lm(mpg ~ ., data = Mydata_new )
 ```
 
+### [**Verification des residus (apres l'elimination de**]{.underline} "carb" et "qsec"[**)**]{.underline}
+
 ```{r}
 summary(model_new)
 ```
+
+### [**Verification de la multi-colinearite du model (apres l'elimination de**]{.underline} "carb" et "qsec"[**)**]{.underline}
 
 ```{r}
 vif(model_new)
 ```
 
-Prédiction
+## [**Prédiction**]{.underline}
 
 ```{r}
 predict(model_new, data.frame(hp = 10, drat = 5, wt = 10, vs = as.factor(0), am = as.factor(0), gear = 7))
