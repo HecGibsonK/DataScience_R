@@ -1,6 +1,6 @@
 ---
 title: "Pratique_5_Prediction_consommation_vehicule"
-author: "HHGK"
+author: "Dr. Hector Gibson Kinmanhon HOUANKPO (PhD)"
 format: html
 editor: visual
 ---
@@ -9,7 +9,7 @@ editor: visual
 
 ## Activation des packages statistiques nécessaires:
 
-##### ggplot2; readxl; dplyr;  psych; cars; car
+##### ggplot2; readxl; dplyr; psych; car
 
 ```{r}
 #| echo: false
@@ -17,6 +17,7 @@ library(ggplot2)    # Visualisation des données
 library(readxl)     # Bibliothèque de manipulation de données dans Excel
 library(dplyr)      # Bibliothèque de manipulation de données statistiques
 library(psych)     # Bibliothèque de statistiques descriptives
+library(car)      # Bibliothèque de modèle de régression
 
 options(digits = 3) # Combien de décimales afficher
 ```
@@ -28,6 +29,7 @@ options(digits = 3) # Combien de décimales afficher
 # Ecrire du code
 data("mtcars")
 
+# Duplication du fichier source
 Mydata <- mtcars[,]
 ```
 
@@ -37,28 +39,28 @@ Mydata <- mtcars[,]
 
 ```{r}
 #| echo: false
-sapply(mtcars, class)
+sapply(Mydata, class)
 ```
 
 ### Voir la structure de la base de données (format plus allonge)
 
 ```{r}
 #| echo: false
-# glimpse(mtcars)
+# glimpse(Mydata)
 ```
 
-###  voir la structure de la base de données (format plus court)
+### voir la structure de la base de données (format plus court)
 
 ```{r}
 #| echo: false
-str(mtcars)
+str(Mydata)
 ```
 
 ### Verification des variables quantitatives par boucle "For"
 
 ```{r}
 #| echo: false
-for (variable in names(mtcars)) {
+for (variable in names(Mydata)) {
   if (is.numeric(mtcars[[variable]])){
     print(paste0(variable," est un numerique"))
   }else {
@@ -71,8 +73,7 @@ for (variable in names(mtcars)) {
 
 ```{r}
 #| echo: false
-summary(mtcars)
-#mtcars[,1]
+summary(Mydata)
 ```
 
 ### Distribution de la consomation des vehicules
@@ -82,50 +83,54 @@ summary(mtcars)
 ```{r}
 #| echo: false
 library(ggplot2)
-ggplot(data = mtcars, aes(x="Consommation des vehicule", y=mpg))+ 
+ggplot(data = Mydata, aes(x="Consommation des vehicule", y=mpg))+ 
   geom_boxplot(color="black", fill="blue")
 ```
 
 ## Choix des variables pertinentes
 
+#### Convertion des variables non quantitatives en facteur via le boucle "For" (Apres visualisation de la base de donne)
+
 ```{r}
 #| echo: false
-mtcars$vs <- as.factor(mtcars$vs)
-mtcars$am <- as.factor(mtcars$am)
+for (variable in names(Mydata)) {
+  if (is.numeric(Mydata[[variable]])){
+    variable = Mydata[[variable]];
+  }else {
+    variable = as.factor(Mydata[[variable]])
+  }
+}
 ```
 
 #### Convertion des variables non quantitatives en facteur
 
 ```{r}
 #| echo: false
-for (variable in names(mtcars)) {
-  if (is.numeric(mtcars[[variable]])){
-    variable = mtcars[[variable]];
-  }else {
-    variable = as.factor(mtcars[[variable]])
-  }
-}
+Mydata$vs <- as.factor(Mydata$vs)
+Mydata$am <- as.factor(Mydata$am)
+
+
 ```
 
 #### Une new base de donnee sans "vs" et "am"
 
 ```{r}
 #| echo: false
-New_base <- mtcars[,-which(names(mtcars) %in% c("vs","am"))]
-str(New_base)
+New_data <- Mydata[,-which(names(Mydata) %in% c("vs","am"))]
+str(New_data)
 ```
 
 ```{r}
 #| echo: false
 # plot(mtcars)
-plot(New_base)
+plot(New_data)
 ```
 
 ## Matrice de correlation entre les variables quantitatives
 
 ```{r}
 #| echo: false
-# cor(mtcars)
+cor(New_data)
 
 ```
 
@@ -133,7 +138,7 @@ plot(New_base)
 
 ```{r}
 #| echo: false
-corPlot(New_base)
+corPlot(New_data)
 ```
 
 Ou via le script suivant
@@ -145,7 +150,7 @@ Ou via le script suivant
 library(reshape2)
  
 # creating correlation matrix
-corr_mat <- round(cor(New_base),2)
+corr_mat <- round(cor(New_data),2)
  
 # reduce the size of correlation matrix
 melted_corr_mat <- melt(corr_mat)
@@ -162,60 +167,108 @@ geom_text(aes(Var2, Var1, label = value),
 
 Les variables fortement négativement reliées à la consomation sont cyl, disp, hp et carb.
 
+### Une note sur les valeurs internes de "vs"
+
 ```{r}
-table(mtcars$vs)
+#| echo: false
+table(Mydata$vs)
+```
+
+### Une note sur les valeurs internes de "am"
+
+```{r}
+#| echo: false
+table(Mydata$am)
 ```
 
 ## Analyse de la liaison entre mpg et am (qualitative deux modalités)
 
-### Test paramétrique:
+### Test paramétrique (Visualisation):
 
 ```{r}
-ggplot(data = mtcars, aes(x=am,y=mpg))+
+#| echo: false
+ggplot(data = Mydata, aes(x=am,y=mpg))+
+  geom_boxplot(aes(fill=mpg))
+```
+
+```{r}
+#| echo: false
+ggplot(data = Mydata, aes(x=vs,y=mpg))+
   geom_boxplot(aes(fill=mpg))
 ```
 
 ### Test paramétrique de student
 
 ```{r}
-# Réalisation d'un t-test pour comparer les moyennes de 'mpg' entre les voitures à transmission manuelle et automatique
-t.test(mpg ~ am, data=mtcars)
+#| echo: false
+# Réalisation d'un t-test pour comparer les moyennes de 'mpg' entre les voitures à transmission manuelle (0) et automatique (1)
+t.test(mpg ~ am, data=Mydata)
 ```
 
-#### Vérification des hypothèses
+Le P-value = 0.001 obtenu est inferieur a 0.05, par consequent nous pouvons dire qu'il y a une difference significative des moyennes entre le groupe 0 et le groupe 1 (C'est-a-dire l'hypothese alternative).
+
+#### [Vérification des hypothèses]{.underline}
+
+##### [Création d'un QQ-plot pour la variable 'mpg']{.underline}
+
+QQ-plot permet de visualiser pour juger de la normalite de la distribution
 
 ```{r}
+#| echo: false
 # Création d'un QQ-plot pour la variable 'mpg'
-qqnorm(mtcars$mpg)
-qqline(mtcars$mpg, col = "red")
+# QQ-plot permet de visualiser pour juger de la normalite de la distribution
+qqnorm(Mydata$mpg)
+qqline(Mydata$mpg, col = "red")
 ```
 
+Plusieurs points sont eloignes de la ligne droite donc nous pouvons en deduire que la distribution n'est pas normal.
+
+#####  [Test de Shapiro-Wilk pour 'mpg']{.underline}
+
+Le test de Shapiro-Wilk fournit un test statistique formel.
+
+Quand P-value \< 0.005 alors S-W suggererait generelement que la distribution de la variable tesee s'ecarte signifiquativement d'une distribution normale.
+
 ```{r}
+#| echo: false
 # Test de Shapiro-Wilk pour 'mpg'
-shapiro.test(mtcars$mpg)
+# Le test de Shapiro-Wilk fournit un test statistique formel.
+#Quand P-value < 0.005 alors S-W suggererait generelement que la distribution de la variable testee s'ecarte signifiquativement d'une distribution normale 
+shapiro.test(Mydata$mpg)
 ```
 
-```{r}
-install.packages("cars")
-# Chargement du package
-library(car)
+Le P-value = 0.1 obtenu est superieur a 0.05, par consequent nous pouvons dire que la distribution de la variable testee ne s'ecarte pas signifiquativement d'une distribution normale.
 
+##### [Test de Levene]{.underline}
+
+Réalisation du test de Levene sur 'mpg' en fonction du type de transmission 'am'
+
+```{r}
+#| echo: false
 # Réalisation du test de Levene sur 'mpg' en fonction du type de transmission 'am'
-leveneTest(mpg ~ am, data=mtcars)
+leveneTest(mpg ~ am, data=Mydata)
 ```
 
-```{r}
-t.test(mpg ~ am, data=mtcars, var.equal = FALSE)
-```
+Dans notre cas si present, le P-value est egal a 0.05, donc l'egalite de la varience ne peut etre verifiee. Alors faisons un Test de Wilc
 
 ```{r}
-wilcox.test(mpg ~ am, data=mtcars)
+#| echo: false
+t.test(mpg ~ am, data=Mydata, var.equal = FALSE)
 ```
+
+Le P-value = 0.001 obtenu est inferieur a 0.05, par consequent nous pouvons dire que la distribution de la variable testee s'ecarte signifiquativement d'une distribution normale.
+
+```{r}
+#| echo: false
+wilcox.test(mpg ~ am, data=Mydata)
+```
+
+Le P-value = 0.002 obtenu est inferieur a 0.05, par consequent nous pouvons dire que la distribution de la variable testee s'ecarte signifiquativement d'une distribution normale.
 
 # Construction du modèle de régression linéaire
 
 ```{r}
-model <- lm(mpg ~ ., data = mtcars )
+model <- lm(mpg ~ ., data = Mydata )
 ```
 
 ```{r}
@@ -239,42 +292,21 @@ geom_text(aes(Var2, Var1, label = value),
 ```
 
 ```{r}
-mtcars_bis <- mtcars[,-which(names(mtcars) %in% c("cyl","disp"," hp","carb","qsec"))]
+Mydata_new <- Mydata[,-which(names(Mydata) %in% c("cyl","disp"," hp","carb","qsec"))]
 
-model_bis <- lm(mpg ~ ., data = mtcars_bis )
+model_new <- lm(mpg ~ ., data = Mydata_new )
 ```
 
 ```{r}
-summary(model_bis)
+summary(model_new)
 ```
 
 ```{r}
-vif(model_bis)
+vif(model_new)
 ```
 
 Prédiction
 
 ```{r}
-predict(model_bis, data.frame(hp = 10, drat = 5, wt = 10, vs = as.factor(0), am = as.factor(0), gear = 7))
+predict(model_new, data.frame(hp = 10, drat = 5, wt = 10, vs = as.factor(0), am = as.factor(0), gear = 7))
 ```
-
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
-```{r}
-1 + 1
-```
-
-You can add options to executable code like this
-
-```{r}
-#| echo: false
-2 * 2
-```
-
-The `echo: false` option disables the printing of code (only output is displayed).
