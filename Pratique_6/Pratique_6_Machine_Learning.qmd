@@ -1,0 +1,85 @@
+---
+title: "Pratique_6_Machine_Learning_R"
+author: "Dr Hector Gibson Kinmanhon HOUANKPO (PhD)"
+format: html
+editor: visual
+---
+
+```{r}
+#| echo: false
+library(ggplot2)    # Visualisation des données
+library(readxl)     # Bibliothèque de manipulation de données dans Excel
+library(dplyr)      # Bibliothèque de manipulation de données statistiques
+library(psych)     # Bibliothèque de statistiques descriptives
+library(car)      # Bibliothèque de modèle de régression
+library(caret)    # Bibliothèque pour Machine learning
+```
+
+# [**Régression logistique en R**]{.underline}
+
+```{r}
+#| echo: false
+Data = read.table(file.choose(), sep=",", header = T)
+```
+
+```{r}
+#| echo: false
+# Duplication de la base de donnees
+Mydata <- Data
+```
+
+### [**Voir les types de donnees de "Clients"**]{.underline}
+
+```{r}
+#| echo: false
+sapply(Mydata, class)
+```
+
+### [**Visualisation de la base de donnees**]{.underline}
+
+```{r}
+#| echo: false
+str(Mydata)
+```
+
+# [**Preprocessing**]{.underline}
+
+## [**Resume descriptif de la base de donnee**]{.underline}
+
+```{r}
+#| echo: false
+summary(Mydata)
+```
+
+### Suppression [**des lignes contenent des valeurs manquantes (recommander)**]{.underline}
+
+```{r}
+#| echo: false
+#Mydata_new <- na.omit(Mydata) 
+```
+
+### [**Imputation des valeurs manquantes par le moyenne(Pas recommander)**]{.underline}
+
+```{r}
+#| echo: false
+Mydata_new = Mydata 
+Mydata_new$Age[is.na(Mydata_new$Age)] <- mean(Mydata_new$Age, na.rm = T)
+```
+
+#### [**Conversion de certaines variable en "Factor"**]{.underline}
+
+```{r}
+#| echo: false
+str(Mydata1)
+Mydata1$Survived <- as.factor(Mydata1$Survived)
+Mydata1$Sex <- as.factor(Mydata1$Sex)
+Mydata1$Pclass <- as.factor(Mydata1$Pclass)
+
+
+```
+
+# [**Diviser la base de données deux**]{.underline}
+
+-   La base d'apprentissage 70% de la base totale
+
+-   La base test: 30%

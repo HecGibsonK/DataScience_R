@@ -224,7 +224,7 @@ qqline(Mydata$mpg, col = "red")
 
 Plusieurs points sont eloignes de la ligne droite donc nous pouvons en deduire que la distribution n'est pas normal.
 
-#####  [Test de Shapiro-Wilk pour 'mpg']{.underline}
+##### [Test de Shapiro-Wilk pour 'mpg']{.underline}
 
 Le test de Shapiro-Wilk fournit un test statistique formel.
 
@@ -318,7 +318,7 @@ summary(model_new0)
 vif(model_new0)
 ```
 
-### Construction du nouvel modèle de régression linéaire**(**apres l'elimination de  "carb" et "qsec"[**)**]{.underline}
+### Construction du nouvel modèle de régression linéaire**(**apres l'elimination de "carb" et "qsec"[**)**]{.underline}
 
 ```{r}
 #| echo: false
