@@ -7,12 +7,14 @@ editor: visual
 
 ```{r}
 #| echo: false
+library(randomForest) # Bibliothèque de foret aleatoire
 library(ggplot2)    # Visualisation des données
 library(readxl)     # Bibliothèque de manipulation de données dans Excel
 library(dplyr)      # Bibliothèque de manipulation de données statistiques
 library(psych)     # Bibliothèque de statistiques descriptives
 library(car)      # Bibliothèque de modèle de régression
 library(caret)    # Bibliothèque pour Machine learning
+library(pROC)     # Bibliothèque pour l'évaluation des modèles 
 ```
 
 # [**Régression logistique en R**]{.underline}
@@ -35,7 +37,7 @@ Mydata <- Data
 sapply(Mydata, class)
 ```
 
-### [**Visualisation de la base de donnees**]{.underline}
+### [**La structure de la base de donnees**]{.underline}
 
 ```{r}
 #| echo: false
@@ -90,7 +92,7 @@ names(Mydata_new)
 
 ```{r}
 
-Mydata_New <- subset(Mydata, select = c(Survived,Pclass,Sex,Age,SibSp,Parch,Fare)) # Sélectionner et/ou supprimer des colonnes d'une table
+Mydata_New <- subset(Mydata_new, select = c(Survived,Pclass,Sex,Age,SibSp,Parch,Fare)) # Sélectionner et/ou supprimer des colonnes d'une table
 
 #Mydata_New <- within(Mydata, rm(PassengerId, Name, Ticket, Cabin,Embarked))  # supprimer des colonnes d'une table 
 
@@ -131,71 +133,78 @@ model_logistique2 <- glm(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare, f
 saveRDS(model_logistique, "/Users/natachanjongwayepnga/Documents/GitHub/LeCoinStat/R_Pour_La_Datascience/Jour7/model_logistique_final.rds")
 ```
 
+### [**Verification des residus**]{.underline}
+
 ```{r}
 summary(model_logistique)
 ```
 
 ```{r}
-anova(model_logistique2, test = "Chisq")
+anova(model_logistique, test = "Chisq")
 ```
 
 ```{r}
-# Significativité globale du modèle
+# Significativité globale du modèle  ??????
  G2 = model_logistique$null.deviance-model_logistique$deviance
  
   1-pchisq(G2,df=1)
 ```
 
-# [**Prédiction sur une nouvelle base**]{.underline}
+# [**Prédiction sur la base de donnee "train"**]{.underline}
+
+#### [**Calcul des scores de prediction (Probabilites) sur les donnees d'entrainement**]{.underline}
 
 ```{r}
-prediction <- predict(model_logistique, type = "response")
+# Calcul des scores de prediction (Probabilites)
+prediction_train <- predict(model_logistique, type = "response")
+prediction_train[1:5]
 ```
+
+#### [**Evaluation des modèles par courbe ROC (Train)**]{.underline}
 
 ```{r}
 # Package pour l'évaluation des modèles
-#install.packages("pROC")
-library(pROC)
+#library(pROC)
+Roc_train <- roc(response = Mydata_train$Survived, predictor = prediction_train)
+Roc_train
 
-prediction <- predict(model_logistique, newdata = base_test[,-1],type = "response")
+plot(Roc_train, main="Courbe ROC")
 ```
 
 ```{r}
-roc_obj <- roc(base_test$Survived, prediction, levels=c("0", "1"))
-print(auc(roc_obj))
-plot(roc_obj, main="Courbe ROC")
+AUC_train <- auc(Roc_train)
+AUC_train
+```
+
+# [**Prédiction sur la base de donnee "Test"**]{.underline}
+
+#### [**Calcul des scores de prediction (Probabilites) sur les donnees test**]{.underline}
+
+```{r}
+prediction_test <- predict(model_logistique, newdata = Mydata_test[,-1], type = "response")
+prediction_test[1:5]
+```
+
+#### [**Evaluation des modèles par courbe ROC(Test)**]{.underline}
+
+```{r}
+Roc_test <- roc(response = Mydata_test$Survived, predictor = prediction_test)
+Roc_test
+
+plot(Roc_test, main="Courbe ROC")
 ```
 
 ```{r}
-roc_resultat <- roc(response = base_test$Survived, predictor = prediction)
-auc_resultat <- auc(roc_resultat)
-auc_resultat
-```
-
-## Prédiction base d'apprentissage
-
-```{r}
-prediction <- predict(model_logistique,type = "response")
-prediction
-
-roc_obj <- roc(base_train$Survived, prediction, levels=c("0", "1"))
-print(auc(roc_obj))
-plot(roc_obj, main="Courbe ROC")
-
-roc_resultat <- roc(response = base_train$Survived, predictor = prediction)
-auc_resultat <- auc(roc_resultat)
-auc_resultat
+AUC_test <- auc(Roc_test)
+AUC_test
 ```
 
 # Forêts aléatoires
 
 ```{r}
 #install.packages("randomForest")
-library(randomForest)
-```
-
-```{r}
-model_rf <- randomForest(Survived ~ ., data=base_train, importance=TRUE,
+#library(randomForest)
+model_rf <- randomForest(Survived ~ ., data=Mydata_train, importance=TRUE,
                         ntree=500)
 model_rf
 ```
@@ -218,20 +227,37 @@ varImpPlot(model_rf)
 plot(model_rf)
 ```
 
+# [**Prédiction sur la base de donnee "Train"**]{.underline}
+
 ```{r}
-prediction_train <-  predict(model_rf, type = "prob")[,2]
+prediction_rf_train <-  predict(model_rf, type = "prob")[,2]
 ```
 
 ```{r}
-roc_obj <- roc(base_train$Survived, prediction_train, levels=c("0", "1"))
-print(auc(roc_obj))
-plot(roc_obj, main="Courbe ROC")
+roc_rf_train <- roc(Mydata_train$Survived, prediction_rf_train, levels=c("0", "1"))
+
+plot(roc_rf_train, main="Courbe ROC")
 ```
 
 ```{r}
-roc_obj <- roc(base_test$Survived, prediction_test, levels=c("0", "1"))
-print(auc(roc_obj))
-plot(roc_obj, main="Courbe ROC")
+AUC_rf_train <- auc(roc_rf_train)
+```
+
+# [**Prédiction sur la base de donnee "Test"**]{.underline}
+
+```{r}
+prediction_rf_test <- predict(model_rf, newdata = Mydata_test[,-1], type = "prob")
+prediction_rf_test[1:5]
+```
+
+```{r}
+roc_rf_test <- roc(Mydata_test$Survived, prediction_rf_test, levels=c("0", "1"))
+
+plot(roc_rf_test, main="Courbe ROC")
+```
+
+```{r}
+AUC_rf_test <- auc(roc_rf_test)
 ```
 
 ## Optimisation des paramètres de la forêt aléatoire
@@ -244,7 +270,7 @@ control <- trainControl(method="cv", number=5, search="grid")
 tunegrid <- expand.grid(.mtry=c(1, 2, 3, 4, 5))
 
 # Entraînement du modèle avec validation croisée et recherche des meilleurs hyperparamètres
-rf_model <- train(Survived ~ ., data=base_train, method="rf", trControl=control, tuneGrid=tunegrid, ntree=500)
+rf_model <- train(Survived ~ ., data=Mydata_train, method="rf", trControl=control, tuneGrid=tunegrid, ntree=500)
 ```
 
 ```{r}
@@ -254,7 +280,7 @@ print(rf_model$bestTune)
 
 ```{r}
 # Entraînement direct avec randomForest pour accès à l'erreur OOB
-rf_model_direct <- randomForest(Survived ~ ., data=base_train, mtry=rf_model$bestTune$mtry, ntree=500)
+rf_model_direct <- randomForest(Survived ~ ., data=Mydata_train, mtry=rf_model$bestTune$mtry, ntree=500)
 
 
 plot(rf_model_direct)
@@ -267,13 +293,19 @@ print(importance)
 ```{r}
 
 # Prédiction sur l'ensemble de test
-predictions <- predict(rf_model, newdata=base_test)
+predictions <- predict(rf_model, newdata=Mydata_test)
+head(predictions)
 ```
 
 ```{r}
 # Calcul de l'AUC et tracé de la courbe ROC
-prob_predictions <- predict(rf_model, newdata=base_test, type="prob")
-roc_obj <- roc(base_test$Survived, prob_predictions[,2], levels=c("0", "1"))
-print(auc(roc_obj))
-plot(roc_obj, main="Courbe ROC")
+prob_predictions <- predict(rf_model, newdata=Mydata_test, type="prob")
+roc_MD <- roc(Mydata_test$Survived, prob_predictions[,2], levels=c("0", "1"))
+
+plot(roc_MD, main="Courbe ROC")
+```
+
+```{r}
+AUC_MD <- auc(roc_MD)
+AUC_MD
 ```
