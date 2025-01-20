@@ -214,6 +214,8 @@ model_rf
 saveRDS(model_rf, "/Users/natachanjongwayepnga/Documents/GitHub/LeCoinStat/R_Pour_La_Datascience/Jour7/model_randomforest.rds")
 ```
 
+#### [**Importance des variables**]{.underline}
+
 ```{r}
 # Importance des variables
 varImp(model_rf)
@@ -231,6 +233,21 @@ plot(model_rf)
 
 ```{r}
 prediction_rf_train <-  predict(model_rf, type = "prob")[,2]
+
+#prediction_rf_train <-  predict(model_rf, type = "response")
+
+head(prediction_rf_train)
+```
+
+```{r}
+#Vérifier le type des variables de Mydata_train et prediction_rf_train
+str(Mydata_train$Survived)
+str(prediction_rf_train)
+```
+
+```{r}
+#Mydata_train$Survived <- as.numeric(as.character(Mydata_train$Survived))
+#prediction_rf_train <- as.numeric(as.character(prediction_rf_train))
 ```
 
 ```{r}
@@ -241,13 +258,28 @@ plot(roc_rf_train, main="Courbe ROC")
 
 ```{r}
 AUC_rf_train <- auc(roc_rf_train)
+AUC_rf_train
 ```
 
 # [**Prédiction sur la base de donnee "Test"**]{.underline}
 
 ```{r}
-prediction_rf_test <- predict(model_rf, newdata = Mydata_test[,-1], type = "prob")
+prediction_rf_test <- predict(model_rf, newdata = Mydata_test[,-1], type = "prob")[,2]
+
+#prediction_rf_test <- predict(model_rf, newdata = Mydata_test[,-1], type = "response")
+
 prediction_rf_test[1:5]
+```
+
+```{r}
+#Vérifier le type des variables de Mydata_train et prediction_rf_train
+str(Mydata_test$Survived)
+str(prediction_rf_test)
+```
+
+```{r}
+#Mydata_test$Survived <- as.numeric(as.character(Mydata_test$Survived))
+#prediction_rf_test <- as.numeric(as.character(prediction_rf_test))
 ```
 
 ```{r}
@@ -258,13 +290,21 @@ plot(roc_rf_test, main="Courbe ROC")
 
 ```{r}
 AUC_rf_test <- auc(roc_rf_test)
+AUC_rf_test
 ```
 
-## Optimisation des paramètres de la forêt aléatoire
+## [Optimisation des paramètres de la forêt aléatoire]{.underline}
+
+-   Définition des paramètres de validation croisée "trainControl"
+
+-   Grid de paramètres à tester "expand.grid"
+
+-   Entraînement du modèle avec validation croisée et recherche des meilleurs hyperparamètres "train"
 
 ```{r}
 # Définition des paramètres de validation croisée
-control <- trainControl(method="cv", number=5, search="grid")
+control <- trainControl(method="cv", number=5, search="grid") 
+              # number = 5 <- nombre d'iteration
 
 # Grid de paramètres à tester
 tunegrid <- expand.grid(.mtry=c(1, 2, 3, 4, 5))
@@ -273,10 +313,14 @@ tunegrid <- expand.grid(.mtry=c(1, 2, 3, 4, 5))
 rf_model <- train(Survived ~ ., data=Mydata_train, method="rf", trControl=control, tuneGrid=tunegrid, ntree=500)
 ```
 
+### [**Meilleurs paramètres trouvés**]{.underline}
+
 ```{r}
 # Meilleurs paramètres trouvés
 print(rf_model$bestTune)
 ```
+
+### [**Entraînement direct avec randomForest pour accès à l'erreur OOB**]{.underline}
 
 ```{r}
 # Entraînement direct avec randomForest pour accès à l'erreur OOB
@@ -290,6 +334,8 @@ importance <- varImp(rf_model, scale=FALSE)
 print(importance)
 ```
 
+### [**Prédiction sur l'ensemble de test**]{.underline}
+
 ```{r}
 
 # Prédiction sur l'ensemble de test
@@ -298,9 +344,17 @@ head(predictions)
 ```
 
 ```{r}
+str(predictions)
+```
+
+```{r}
 # Calcul de l'AUC et tracé de la courbe ROC
-prob_predictions <- predict(rf_model, newdata=Mydata_test, type="prob")
-roc_MD <- roc(Mydata_test$Survived, prob_predictions[,2], levels=c("0", "1"))
+prob_predictions <- predict(rf_model, newdata=Mydata_test, type="raw")
+head(prob_predictions)
+```
+
+```{r}
+roc_MD <- roc(Mydata_test$Survived, prob_predictions)
 
 plot(roc_MD, main="Courbe ROC")
 ```
