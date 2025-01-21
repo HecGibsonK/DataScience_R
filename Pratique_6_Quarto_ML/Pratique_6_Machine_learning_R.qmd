@@ -1,5 +1,5 @@
 ---
-title: "Pratique_6_Machine_Learning_R"
+title: "Pratique_6_Machine_learning_R"
 author: "Dr Hector Gibson Kinmanhon HOUANKPO (PhD)"
 format: html
 editor: visual
@@ -51,21 +51,22 @@ str(Mydata)
 ```{r}
 #| echo: false
 summary(Mydata)
+colSums(is.na(Mydata))
 ```
 
 ### Suppression [**des lignes contenent des valeurs manquantes (recommander)**]{.underline}
 
 ```{r}
 #| echo: false
-# Mydata_new <- na.omit(Mydata) 
+Mydata_new <- na.omit(Mydata) 
 ```
 
 ### [**Imputation des valeurs manquantes par le moyenne(Pas recommander)**]{.underline}
 
 ```{r}
 #| echo: false
-Mydata_new = Mydata 
-Mydata_new$Age[is.na(Mydata_new$Age)] <- mean(Mydata_new$Age, na.rm = T)
+# Mydata_new = Mydata 
+# Mydata_new$Age[is.na(Mydata_new$Age)] <- mean(Mydata_new$Age, na.rm = T)
 ```
 
 #### [**Conversion de certaines variable en "Factor"**]{.underline}
@@ -87,11 +88,12 @@ str(Mydata_new)
 ### [**Choix des variables pertinantes**]{.underline}
 
 ```{r}
+#| echo: false
 names(Mydata_new)
 ```
 
 ```{r}
-
+#| echo: false
 Mydata_New <- subset(Mydata_new, select = c(Survived,Pclass,Sex,Age,SibSp,Parch,Fare)) # Sélectionner et/ou supprimer des colonnes d'une table
 
 #Mydata_New <- within(Mydata, rm(PassengerId, Name, Ticket, Cabin,Embarked))  # supprimer des colonnes d'une table 
@@ -101,19 +103,22 @@ Mydata_New <- subset(Mydata_new, select = c(Survived,Pclass,Sex,Age,SibSp,Parch,
 names(Mydata_New)
 ```
 
+#### [**La repartition de la base de donnees**]{.underline}
+
 ```{r}
-set.seed(123)# Assurer la reproductibilité de votre 
+##| echo: false
+set.seed(123)# Assurer la reproductibilité de votre base de donnee
 index <- createDataPartition(Mydata_New$Survived, p=0.7, list=F)
-head(index)
 ```
 
 ```{r}
-# autre option
-index1 <- sample(1:nrow(Mydata_New), 0.7*nrow(Mydata_New))
-head(index1)
+# Autre option de repartition de la base de donnees
+#index1 <- sample(1:nrow(Mydata_New), 0.7*nrow(Mydata_New))
+#head(index1)
 ```
 
 ```{r}
+#| echo: false
 Mydata_train <- Mydata_New[index, ]
 Mydata_test <- Mydata_New[-index,]
 
@@ -130,7 +135,7 @@ model_logistique2 <- glm(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare, f
 
 ```{r}
 # Stocker le modèle
-saveRDS(model_logistique, "/Users/natachanjongwayepnga/Documents/GitHub/LeCoinStat/R_Pour_La_Datascience/Jour7/model_logistique_final.rds")
+saveRDS(model_logistique, "E:/WORLD/PERSO/Programmation/GitHub/DataScience_R/Pratique_7_Shiny/model_logistique_final.rds")
 ```
 
 ### [**Verification des residus**]{.underline}
@@ -157,7 +162,7 @@ anova(model_logistique, test = "Chisq")
 ```{r}
 # Calcul des scores de prediction (Probabilites)
 prediction_train <- predict(model_logistique, type = "response")
-prediction_train[1:5]
+head(prediction_train)
 ```
 
 #### [**Evaluation des modèles par courbe ROC (Train)**]{.underline}
@@ -182,7 +187,7 @@ AUC_train
 
 ```{r}
 prediction_test <- predict(model_logistique, newdata = Mydata_test[,-1], type = "response")
-prediction_test[1:5]
+head(prediction_test)
 ```
 
 #### [**Evaluation des modèles par courbe ROC(Test)**]{.underline}
@@ -211,7 +216,7 @@ model_rf
 
 ```{r}
 # Stocker le modèle
-saveRDS(model_rf, "/Users/natachanjongwayepnga/Documents/GitHub/LeCoinStat/R_Pour_La_Datascience/Jour7/model_randomforest.rds")
+saveRDS(model_rf, "E:/WORLD/PERSO/Programmation/GitHub/DataScience_R/Pratique_7_Shiny/model_randomforest.rds")
 ```
 
 #### [**Importance des variables**]{.underline}
@@ -232,7 +237,7 @@ plot(model_rf)
 # [**Prédiction sur la base de donnee "Train"**]{.underline}
 
 ```{r}
-prediction_rf_train <-  predict(model_rf, type = "prob")[,2]
+prediction_rf_train <-  predict(model_rf, type = "prob")
 
 #prediction_rf_train <-  predict(model_rf, type = "response")
 
@@ -251,7 +256,7 @@ str(prediction_rf_train)
 ```
 
 ```{r}
-roc_rf_train <- roc(Mydata_train$Survived, prediction_rf_train, levels=c("0", "1"))
+roc_rf_train <- roc(Mydata_train$Survived, prediction_rf_train[,1], levels=c("0", "1"))
 
 plot(roc_rf_train, main="Courbe ROC")
 ```
@@ -264,11 +269,11 @@ AUC_rf_train
 # [**Prédiction sur la base de donnee "Test"**]{.underline}
 
 ```{r}
-prediction_rf_test <- predict(model_rf, newdata = Mydata_test[,-1], type = "prob")[,2]
+prediction_rf_test <- predict(model_rf, newdata = Mydata_test[,-1], type = "prob")
 
 #prediction_rf_test <- predict(model_rf, newdata = Mydata_test[,-1], type = "response")
 
-prediction_rf_test[1:5]
+head(prediction_rf_test)
 ```
 
 ```{r}
@@ -283,7 +288,7 @@ str(prediction_rf_test)
 ```
 
 ```{r}
-roc_rf_test <- roc(Mydata_test$Survived, prediction_rf_test, levels=c("0", "1"))
+roc_rf_test <- roc(Mydata_test$Survived, prediction_rf_test[,2], levels=c("0", "1"))
 
 plot(roc_rf_test, main="Courbe ROC")
 ```
@@ -307,10 +312,17 @@ control <- trainControl(method="cv", number=5, search="grid")
               # number = 5 <- nombre d'iteration
 
 # Grid de paramètres à tester
-tunegrid <- expand.grid(.mtry=c(1, 2, 3, 4, 5))
+tunegrid <- expand.grid(.mtry=c(1:6))
 
 # Entraînement du modèle avec validation croisée et recherche des meilleurs hyperparamètres
 rf_model <- train(Survived ~ ., data=Mydata_train, method="rf", trControl=control, tuneGrid=tunegrid, ntree=500)
+```
+
+```{r}
+# Importance des variables
+plot(rf_model)
+importance <- varImp(rf_model, scale=FALSE)
+print(importance)
 ```
 
 ### [**Meilleurs paramètres trouvés**]{.underline}
@@ -320,41 +332,46 @@ rf_model <- train(Survived ~ ., data=Mydata_train, method="rf", trControl=contro
 print(rf_model$bestTune)
 ```
 
-### [**Entraînement direct avec randomForest pour accès à l'erreur OOB**]{.underline}
+### [**Entraînement direct avec randomForest pour accès à l'erreur OOB (Pas necessaire)**]{.underline}
 
 ```{r}
 # Entraînement direct avec randomForest pour accès à l'erreur OOB
 rf_model_direct <- randomForest(Survived ~ ., data=Mydata_train, mtry=rf_model$bestTune$mtry, ntree=500)
 
 
-plot(rf_model_direct)
-
-# Importance des variables
-importance <- varImp(rf_model, scale=FALSE)
-print(importance)
+plot(rf_model_direct) 
 ```
 
 ### [**Prédiction sur l'ensemble de test**]{.underline}
 
 ```{r}
-
 # Prédiction sur l'ensemble de test
 predictions <- predict(rf_model, newdata=Mydata_test)
 head(predictions)
 ```
 
 ```{r}
-str(predictions)
-```
-
-```{r}
-# Calcul de l'AUC et tracé de la courbe ROC
 prob_predictions <- predict(rf_model, newdata=Mydata_test, type="raw")
 head(prob_predictions)
 ```
 
 ```{r}
-roc_MD <- roc(Mydata_test$Survived, prob_predictions)
+#Vérifier le type des variables de Mydata_train et prediction_rf_train
+str(Mydata_test$Survived)
+str(predictions)
+```
+
+```{r}
+#Mydata_train$Survived <- as.numeric(as.character(Mydata_train$Survived))
+predictions <- as.numeric(as.character(predictions))
+prob_predictions <- as.numeric(as.character(prob_predictions))
+```
+
+### [**Calcul de l'AUC et tracé de la courbe ROC**]{.underline}
+
+```{r}
+# Calcul de l'AUC et tracé de la courbe ROC
+roc_MD <- roc(Mydata_test$Survived, predictions)
 
 plot(roc_MD, main="Courbe ROC")
 ```
@@ -363,3 +380,24 @@ plot(roc_MD, main="Courbe ROC")
 AUC_MD <- auc(roc_MD)
 AUC_MD
 ```
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
