@@ -9,31 +9,15 @@
 
 library(shiny)
 
-# Define UI (User interface) for application that draws a histogram
-ui <- fluidPage(
-  titlePanel("Prédiction de Survie"),
-  
-  sidebarLayout(
-    
-    sidebarPanel(
-      
-      selectInput("Pclass", "Classe du passager", c("1","2","3"), NULL),
-      selectInput("Sex", "Genre du passager", c("male","female")),
-      numericInput("Age", "Age du passager", 5, min = 0, max = 120),
-      numericInput("SibSp", "Nombre de freres/soeurs ou epoux/epoues a bord", 2, min = 0, max = 8),
-      numericInput("Parch", "Nombre de parents/enfants a bord", 2, min = 0, max = 10),
-      numericInput("Fare", "Tarif", 30, min = 0, max = 3000),
-      actionButton("predict", "Prédire")
-    ),
-    
-    mainPanel(
-      
-      textOutput("prediction")
-      
-    )
-  )
 
-)
+
+
+
+
+
+
+
+
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {

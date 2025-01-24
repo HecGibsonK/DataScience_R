@@ -65,8 +65,8 @@ Mydata_new <- na.omit(Mydata)
 
 ```{r}
 #| echo: false
-# Mydata_new = Mydata 
-# Mydata_new$Age[is.na(Mydata_new$Age)] <- mean(Mydata_new$Age, na.rm = T)
+#Mydata_new = Mydata 
+#Mydata_new$Age[is.na(Mydata_new$Age)] <- mean(Mydata_new$Age, na.rm = T)
 ```
 
 #### [**Conversion de certaines variable en "Factor"**]{.underline}
@@ -126,6 +126,10 @@ names(Mydata_train)
 ```
 
 # [**Regression logistique**]{.underline}
+
+```{r}
+unique(Mydata_New$Parch)
+```
 
 ```{r}
 model_logistique <- glm(Survived ~ ., family = binomial, data = Mydata_train)
@@ -188,6 +192,11 @@ AUC_train
 ```{r}
 prediction_test <- predict(model_logistique, newdata = Mydata_test[,-1], type = "response")
 head(prediction_test)
+```
+
+```{r}
+pred <- ifelse(prediction_test > 0.5, "Survie", "Non survie")
+paste(pred, "avec une probabilite de", prediction_test)
 ```
 
 #### [**Evaluation des modèles par courbe ROC(Test)**]{.underline}
