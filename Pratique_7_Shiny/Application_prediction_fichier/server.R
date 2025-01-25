@@ -21,7 +21,7 @@ function(input, output, session) {
   observeEvent(input$loadData, {
     req(input$file1) # S'assurer qu'un fichier est bien chargé
     # Utilisation de ';' comme séparateur
-    df <- read.csv(input$file1$datapath, sep =",")
+    df <- read.csv(input$file1$datapath) #, sep =",")
     
     # Conversion de 'Pclass' et 'Sex' en facteurs
     df$Pclass <- as.factor(df$Pclass)
@@ -36,35 +36,32 @@ function(input, output, session) {
   })
   
   
-  
-  
-  
-  
-  
-  
-  
-  
-  output$prediction <- renderText({
-    
-    #Preparation des donees
-    New_data <- data.frame(
+  output$predictionsTable <- renderDT({
+    req(data()) # S'assurer que les données sont disponibles et non vides
+    if (nrow(data()) > 0) {
+      # Charger le modèle
+      Modele_logistique2 <- readRDS("E:/WORLD/PERSO/Programmation/GitHub/DataScience_R/Pratique_7_Shiny/model_logistique_final.rds") 
       
-      Pclass = as.factor(input$Pclass),
-      Sex = as.factor(input$Sex),
-      Age = as.numeric(input$Age),
-      SibSp = as.numeric(input$SibSp),
-      Parch = as.numeric(input$Parch),
-      Fare = as.numeric(input$Fare)
+      newData <- data()
       
-    )
-    
-    pro <- predict(Modele_logistique, newdata = New_data, type = "response")
-    
-    pred <- ifelse(pro > 0.5, "Survie", "Non survie")
-    
-    paste(pred, " avec une probabilite de", pro)
-    
-  })
+      # Prédictions
+      prob <- predict(model_logistique2, newdata = newData, type = "response")
+      predictions <- ifelse(prob > 0.5, "Survecu", "Pas survecu")
+      
+      results <- cbind(newData, Predictions = predictions) # Ajouter les prédictions aux données
+      
+      return(results)
+    } else {
+      return(data.frame(Error = "Aucune donnée à afficher. Veuillez charger un fichier CSV."))
+    }
+  }, options = list(pageLength = 5)
+  )  
+  
+  
+  
+  
+  
+
   
   
 }

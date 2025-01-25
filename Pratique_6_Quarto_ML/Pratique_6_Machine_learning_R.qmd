@@ -115,6 +115,13 @@ index <- createDataPartition(Mydata_New$Survived, p=0.7, list=F)
 # Autre option de repartition de la base de donnees
 #index1 <- sample(1:nrow(Mydata_New), 0.7*nrow(Mydata_New))
 #head(index1)
+
+###################################################################
+
+ind <- sample(2, nrow(Mydata_New), replace = TRUE, prob = c(0.7, 0.3))
+
+#Mydata_train <- Mydata_New[ind==1,]
+#Mydata_test <- Mydata_New[ind==2,]
 ```
 
 ```{r}
@@ -196,7 +203,13 @@ head(prediction_test)
 
 ```{r}
 pred <- ifelse(prediction_test > 0.5, "Survie", "Non survie")
-paste(pred, "avec une probabilite de", prediction_test)
+#paste(pred, "avec une probabilite de", prediction_test)
+```
+
+```{r}
+#?????????????????????????????????????????
+#predict(prediction_test, data.frame(Pclass = as.factor(1), Age = 25, SibSp = 2, Parch = 2, Fare = 500))
+  
 ```
 
 #### [**Evaluation des modèles par courbe ROC(Test)**]{.underline}

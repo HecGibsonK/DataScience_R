@@ -279,7 +279,13 @@ model
 summary(model)
 ```
 
-### [**Analyse de la normalite des residus**]{.underline}
+```{r}
+# Model Diagnostics
+par(mfrow=c(2,2))
+plot(model)
+```
+
+### [** Analyse de la normalite des residus**]{.underline}
 
 ```{r}
 residualPlot(model)
@@ -312,6 +318,12 @@ model_new0 <- lm(mpg ~ ., data = Mydata_new0 )
 summary(model_new0)
 ```
 
+```{r}
+# Model Diagnostics
+par(mfrow=c(2,2))
+plot(model_new0)
+```
+
 ### [**Verification de la multi-colinearite du model (apres l'elimination de**]{.underline} "cyl", "disp" et "hp"[**)**]{.underline}
 
 ```{r}
@@ -333,7 +345,13 @@ model_new <- lm(mpg ~ ., data = Mydata_new )
 summary(model_new)
 ```
 
-### [**Verification de la multi-colinearite du model (apres l'elimination de**]{.underline} "carb" et "qsec"[**)**]{.underline}
+```{r}
+# model_new Diagnostics
+par(mfrow=c(2,2))
+plot(model_new)
+```
+
+### [** Verification de la multi-colinearite du model (apres l'elimination de**]{.underline} "carb" et "qsec"[**)**]{.underline}
 
 ```{r}
 vif(model_new)

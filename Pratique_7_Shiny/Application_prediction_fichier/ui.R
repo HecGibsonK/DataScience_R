@@ -39,9 +39,9 @@ ui <- dashboardPage(
         actionButton("loadData", "charger les donnees")
       ),
       
-      tabItem(tabName = "Affichage", DTOutput("dataTable"))
+      tabItem(tabName = "Affichage", DTOutput("dataTable")),
       
-      #tabItem(tabName = "Prediction", DTOutput("predictionsTable"))
+      tabItem(tabName = "predictions", DTOutput("predictionsTable"))
       
     )
   )
